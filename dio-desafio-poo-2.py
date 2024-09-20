@@ -77,8 +77,8 @@ class ContaCorrente(Conta):
         self.limite = limite
         self.limite_saques = limite_saques
     
-    def sacar(self, valor) :
-        numero_saques = len([transacao for transacao in self.historico.transacoes if transacao["tipo" == Saque.__name__]])
+    def sacar(self, valor) :        
+        numero_saques = len([transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__])
         if self._saldo < valor:
             print("\n***   Saldo insuficiente!   ***")
         elif numero_saques >= self.limite_saques:
@@ -106,7 +106,7 @@ class Historico:
         self.transacoes.append({
             "tipo": type(transacao).__name__,
             "valor": transacao.valor,
-            "data": datetime.now().strftime("%d-%m-%Y %H:%M:%s"),
+            "data": datetime.now().strftime("%m-%d-%Y, %H:%M:%S")
         })
 
 class Transacao(ABC):
@@ -183,8 +183,7 @@ def cadastrar_cliente(clientes):
     print("\n   Cliente cadastrado!\n")
     return 
 
-def filtrar_cliente(cpf, clientes):
-    
+def filtrar_cliente(cpf, clientes):    
     clientes_filtrados = [cliente for cliente in clientes if cliente.cpf == cpf]  
     return clientes_filtrados[0] if clientes_filtrados else None
 
@@ -216,14 +215,18 @@ def listar_contas(contas):
         print(str(conta))
     return
 
-def recuperar_conta_cliente(cliente):
+def recuperar_conta_cliente(cliente):    
     if not cliente.contas:
         print("\n***   Conta não existe!   ***\n")
         return
     return cliente.contas[0]
 
 def depositar(clientes):
-    cpf = input("Digite o CPF do cliente: ")    
+    try:
+        cpf = int(input("Digite o CPF do cliente, apenas numeros: ") )
+    except ValueError:
+        print("\n***   CPF invalido, apenas numeros   ***")
+        return  
     cliente = filtrar_cliente(cpf, clientes)
         
     if not cliente:
@@ -243,7 +246,11 @@ def depositar(clientes):
     cliente.realizar_transacao(conta, transacao)
 
 def sacar(clientes):
-    cpf = input("Digite o CPF do cliente: ")    
+    try:
+        cpf = int(input("Digite o CPF do cliente, apenas numeros: ") )
+    except ValueError:
+        print("\n***   CPF invalido, apenas numeros   ***")
+        return 
     cliente = filtrar_cliente(cpf,clientes)
         
     if not cliente:
@@ -263,7 +270,11 @@ def sacar(clientes):
     cliente.realizar_transacao(conta, transacao)    
 
 def mostrar_extrato(clientes):
-    cpf = input("Digite o CPF do cliente: ")
+    try:
+        cpf = int(input("Digite o CPF do cliente, apenas numeros: ") )
+    except ValueError:
+        print("\n***   CPF invalido, apenas numeros   ***")
+        return
     cliente = filtrar_cliente(cpf, clientes)
     
     if not cliente:
@@ -279,14 +290,12 @@ def mostrar_extrato(clientes):
     if not transacoes:
         extrato = "***   Não há transações   ***"
     else:
-        for transacao in transacoes:
-            extrato += f"Data: {transacao.data}\nTipo: {transacao.tipo}\nR$ {transacao.valor:.2f}"
+        for transacao in transacoes:            
+            extrato += f"\nData: {transacao['data']}\tTipo: {transacao['tipo']}\tValor: R$ {transacao['valor']:.2f}"
     
     print(extrato)
     print(f"\nSaldo: R$ {conta.saldo:.2f}")
     print("\n===========================")
-    
-        
     
 def main():    
     clientes = []
@@ -319,7 +328,6 @@ def main():
                 break
             case _:
                 print("\n\n***    Opção inválida. Por favor, tente novamente.")
-                
 
 main()       
 
